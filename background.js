@@ -1,5 +1,8 @@
 
-chrome.action.onClicked.addListener(async (tab) => {
+console.log(new Date())
+
+
+async function openTabs() {
     console.log('拡張機能のアイコンがクリックされました')
 
     loginflg = false;
@@ -26,48 +29,75 @@ chrome.action.onClicked.addListener(async (tab) => {
     })
     console.log("dataflg:", dataflg)
     console.log("untenflg:", untenflg)
-});
-console.log("end");
+    return false
+};
 
-//content_scriptのアクションで発火する。
-chrome.runtime.onMessage.addListener(async function (message, sender, sendResponse) {
-    //①APIに渡す値をformDataに格納。
-    console.log("message", sender, sendResponse, message)
-    console.log(sender)
 
-    await chrome.tabs.query({}, (tabs) => {
+async function sendCarInput(car_input) {
+    if (OperationBack) {
+        OperationBack.postMessage({ carinput: true })
+    }
+};
 
-        for (let i = 0; i < tabs.length; i++) {
-            // console.log(tabs[i])
-            if (tabs[i].url == "https://theearth-np.com/F-GOS0030[DataDisplayConfig].aspx") {
-                chrome.tabs.sendMessage(tabs[i].id, { message: '選択範囲ちょうだい2' })
 
+chrome.runtime.onConnect.addListener(async (port) => {
+    // console.assert(port.name === "knockknock");
+    if (port.name === "popup_back") {
+        popup_back = port
+        popup_back.onMessage.addListener(async (msg) => {
+            if (msg.event) {
+                switch (msg.event) {
+                    case "startdownload":
+                        if (GeneralBack){
+
+                            GeneralBack.postMessage({ event: "startdownload" })
+                        }
+                        break
+                }
             }
-        }
-    })
-    chrome.tabs.sendMessage(sender.tab.id, { message: '選択範囲ちょうだい' })
-    //     if (!item) {
-    //         alert('選択範囲が見つかりませんでした');
-    //         return;
-    //     }
-    //     $('#memo').val($('#memo').val() + item);
-    // });
-    // var fd = new FormData();
-    // fd.append("demo_data", message.submitData);
-
-    // //②fetchAPIで外部サイトにアクセスする
-    // fetch('https://任意のドメイン', {
-    //     method: 'POST',
-    //     body: fd
-    // })
-    // .then(response => response.json())
-    // //③apiからの戻り値をcontent_scriptに返す。
-    // .then(data => {
-    //     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    //         chrome.tabs.sendMessage(tabs[0].id, {message: data});
-    //     });
-    // })
-    // .catch(error => {
-    //     console.error(error);
-    // });
+            if (msg.carinput) {
+                console.log("carinput:", msg.carinput)
+                await openTabs()
+            }
+        })
+    }
+    if (port.name === "OperationBack") {
+        OperationBack = port
+        await sendCarInput()
+    }
+    if (port.name === "DispConfigBack") {
+        DispConfigBack = port
+        DispConfigBack.onMessage.addListener(async (msg) => {
+            if (msg.event) {
+                switch (msg.event) {
+                    case "DataDisplayConfigSet":
+                        if (GeneralBack) {
+                            GeneralBack.postMessage({ event: "DataDisplayConfigSet" })
+                        }
+                        break
+                }
+            }
+        })
+        // await sendCarInput()
+    }
+    if (port.name === "GeneralBack") {
+        GeneralBack = port
+        // await sendCarInput()
+    }
+    if (port.name === "OpeWorkEditBack") {
+        OpeWorkEditBack = port
+        OpeWorkEditBack.onMessage.addListener(async (msg) => {
+            if (msg.event) {
+                switch (msg.event) {
+                    case "startdownload":
+                        console.log("back start download")
+                        if (GeneralBack) {
+                            GeneralBack.postMessage({ event: "startdownload" })
+                        }
+                        break
+                }
+            }
+        })
+        // await sendCarInput()
+    }
 });

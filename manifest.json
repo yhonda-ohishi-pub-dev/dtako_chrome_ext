@@ -9,6 +9,15 @@
     
     "default_popup": "./html/index.html"
   },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+H",
+        "mac": "MacCtrl+Shift+H"
+      },
+      "description": "Run extension."
+    }
+  },
   "permissions": [
     "storage",
     "tabs"
@@ -34,7 +43,7 @@
       "js": [
         "jquery-3.7.1.min.js",
         "jquery.cookie.js",
-        "content_script2.js"
+        "OperationEdit.js"
       ]
     },
     {
@@ -45,6 +54,26 @@
         "jquery-3.7.1.min.js",
         "jquery.cookie.js",
         "DataDisplayConfig.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://theearth-np.com/F-NOS3010[GeneralCsv].aspx*"
+      ],
+      "js": [
+        "jquery-3.7.1.min.js",
+        "jquery.cookie.js",
+        "GeneralCsv.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://theearth-np.com/F-DES1013[OperationWorkEdit].aspx*"
+      ],
+      "js": [
+        "jquery-3.7.1.min.js",
+        "jquery.cookie.js",
+        "OperationWorkEdit.js"
       ]
     }
   ]
