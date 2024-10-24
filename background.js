@@ -48,7 +48,7 @@ chrome.runtime.onConnect.addListener(async (port) => {
             if (msg.event) {
                 switch (msg.event) {
                     case "startdownload":
-                        if (GeneralBack){
+                        if (GeneralBack) {
 
                             GeneralBack.postMessage({ event: "startdownload" })
                         }
@@ -58,6 +58,9 @@ chrome.runtime.onConnect.addListener(async (port) => {
             if (msg.carinput) {
                 console.log("carinput:", msg.carinput)
                 await openTabs()
+
+                await sendCarInput()
+
             }
         })
     }
@@ -87,6 +90,22 @@ chrome.runtime.onConnect.addListener(async (port) => {
     if (port.name === "OpeWorkEditBack") {
         OpeWorkEditBack = port
         OpeWorkEditBack.onMessage.addListener(async (msg) => {
+            if (msg.event) {
+                switch (msg.event) {
+                    case "startdownload":
+                        console.log("back start download")
+                        if (GeneralBack) {
+                            GeneralBack.postMessage({ event: "startdownload" })
+                        }
+                        break
+                }
+            }
+        })
+        // await sendCarInput()
+    }
+    if (port.name === "OperationExpenseEdit") {
+        OperationExpenseEdit = port
+        OperationExpenseEdit.onMessage.addListener(async (msg) => {
             if (msg.event) {
                 switch (msg.event) {
                     case "startdownload":

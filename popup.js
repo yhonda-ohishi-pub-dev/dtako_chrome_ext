@@ -7,14 +7,13 @@ port.onMessage.addListener(function (msg) {
     }
 });
 console.log("popup.js")
-$("#carInput").keydown(function (e) {
+$(document).on("keydown", "#carInput", (e) => {
     if (e.keyCode == 13) {
         console.log("enter")
         chrome.storage.sync.set(
             { searchVal: $("#carInput").val() }
         );
         port.postMessage({ carinput: $("#carInput").val() });
-        // chrome.runtime.sendMessage({ carinput: $("#carInput").val() });
     }
 });
 

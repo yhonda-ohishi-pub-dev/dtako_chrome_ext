@@ -1,5 +1,5 @@
-console.log("OpeWorkEditBack")
-var port = chrome.runtime.connect({ name: "OpeWorkEditBack" });
+console.log("OperationExpenseEdit")
+var port = chrome.runtime.connect({ name: "OperationExpenseEdit" });
 $(document).ready(() => {
 
     $(document).on("click", "#popup_1", () => {
