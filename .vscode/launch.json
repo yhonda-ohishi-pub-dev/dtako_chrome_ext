@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug on Chrome",
+            "url":"https://theearth-np.com/F-OES1010[Login].aspx?mode=timeout",
+            "runtimeArgs": [
+                "--load-extension=${workspaceFolder}"
+            ],
+            "sourceMaps":true, // ソースマップを有効にする
+            "trace": true, // デバッグ コンソールを取り込む
+        }
+    ]
+}

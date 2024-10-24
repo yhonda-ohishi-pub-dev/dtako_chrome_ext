@@ -1,0 +1,15 @@
+{
+  "name": "dtako",
+  "description": "Remove Unnecessary Parts from Tabelog etc.",
+  "version": "0.1",
+  "manifest_version": 3,
+  
+  "action": {
+  },
+  "permissions": [
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}

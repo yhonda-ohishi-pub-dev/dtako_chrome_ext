@@ -1,0 +1,51 @@
+{
+  "name": "Chrome Extention Click Icon",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    
+    "default_popup": "./html/index.html"
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://theearth-np.com/F-OES1010[Login].aspx*"
+      ],
+      "js": [
+        "jquery-3.7.1.min.js",
+        "jquery.cookie.js",
+        "content_script.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://theearth-np.com/F-DES1010[OperationEdit].aspx*"
+      ],
+      "js": [
+        "jquery-3.7.1.min.js",
+        "jquery.cookie.js",
+        "content_script2.js"
+      ]
+    },
+    {
+      "matches": [
+        "https://theearth-np.com/F-GOS0030[DataDisplayConfig].aspx*"
+      ],
+      "js": [
+        "jquery-3.7.1.min.js",
+        "jquery.cookie.js",
+        "DataDisplayConfig.js"
+      ]
+    }
+  ]
+}
