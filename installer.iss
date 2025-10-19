@@ -1,5 +1,5 @@
 #define MyAppName "デジタコデータ取込補助"
-#define MyAppVersion "1.6"
+#define MyAppVersion "1.7"
 #define MyAppPublisher "Your Company Name"
 #define MyAppURL "https://github.com/yhonda-ohishi-pub-dev/dtako_chrome_ext"
 #define ExtensionId "cbopaljicfjeophjpnnbgdhcpnlhobcj"
@@ -34,14 +34,38 @@ Source: "dtako_chrome_ext.crx"; DestDir: "{app}"; Flags: ignoreversion
 ; レジストリは使用しない（個人PCでは動作しないため）
 
 [Code]
+function GetChromePath(): String;
+var
+  ChromePath: String;
+begin
+  // Chrome のパスを検索
+  ChromePath := ExpandConstant('{pf}\Google\Chrome\Application\chrome.exe');
+  if FileExists(ChromePath) then
+  begin
+    Result := ChromePath;
+    Exit;
+  end;
+
+  ChromePath := ExpandConstant('{localappdata}\Google\Chrome\Application\chrome.exe');
+  if FileExists(ChromePath) then
+  begin
+    Result := ChromePath;
+    Exit;
+  end;
+
+  Result := '';
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   CrxPath: String;
+  ChromePath: String;
   ResultCode: Integer;
 begin
   if CurStep = ssPostInstall then
   begin
     CrxPath := ExpandConstant('{app}\dtako_chrome_ext.crx');
+    ChromePath := GetChromePath();
 
     if MsgBox('インストールが完了しました。' + #13#10 + #13#10 +
               '次の手順で拡張機能をインストールしてください：' + #13#10 + #13#10 +
@@ -53,8 +77,17 @@ begin
               '今すぐChromeで chrome://extensions/ を開きますか？',
               mbConfirmation, MB_YESNO) = IDYES then
     begin
-      // Chromeで拡張機能ページを開く
-      Exec('cmd.exe', '/c start chrome://extensions/', '', SW_HIDE, ewNoWait, ResultCode);
+      if ChromePath <> '' then
+      begin
+        // Chromeの実行ファイルを直接指定して拡張機能ページを開く
+        Exec(ChromePath, 'chrome://extensions/', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
+      end
+      else
+      begin
+        MsgBox('Google Chromeが見つかりませんでした。' + #13#10 +
+               'Chromeをインストールしてから、手動でchrome://extensions/を開いてください。',
+               mbError, MB_OK);
+      end;
 
       // エクスプローラーでCRXファイルの場所を開く
       Exec('explorer.exe', '/select,"' + CrxPath + '"', '', SW_SHOWNORMAL, ewNoWait, ResultCode);
