@@ -1,11 +1,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'update_manifest.xml'
+  workflow_run:
+    workflows: ["Build and Release"]
+    types:
+      - completed
 
 permissions:
   contents: read
@@ -20,13 +19,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Create pages directory
+    - name: Download update_manifest.xml from latest release
       run: |
+        # 最新のリリースからupdate_manifest.xmlをダウンロード
+        LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
+        echo "Latest release: $LATEST_RELEASE"
+
         mkdir -p pages
-        cp update_manifest.xml pages/
+        curl -L -o pages/update_manifest.xml "https://github.com/${{ github.repository }}/releases/download/${LATEST_RELEASE}/update_manifest.xml"
+
+        echo "Downloaded update_manifest.xml:"
+        cat pages/update_manifest.xml
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
