@@ -111,7 +111,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ./Output/digitaco-chrome-ext-setup-v1.0.exe
+          ./Output/digitaco-chrome-ext-setup-v*.exe
           dtako_chrome_ext.crx
           update_manifest.xml
         name: Release ${{ github.ref_name }}
