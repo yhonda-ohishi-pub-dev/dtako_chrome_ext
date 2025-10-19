@@ -24,14 +24,29 @@ jobs:
         Write-Host ".pem file restored successfully"
       shell: powershell
 
-    - name: Install Chrome
-      run: |
-        choco install googlechrome -y
-      shell: powershell
-
     - name: Build CRX file
       run: |
-        $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        # Chromeのパスを探す（GitHub Actionsランナーに既にインストールされている）
+        $chromePaths = @(
+          "C:\Program Files\Google\Chrome\Application\chrome.exe",
+          "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+          "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+        )
+
+        $chromePath = $null
+        foreach ($path in $chromePaths) {
+          if (Test-Path $path) {
+            $chromePath = $path
+            Write-Host "Found Chrome at: $chromePath"
+            break
+          }
+        }
+
+        if (-not $chromePath) {
+          Write-Error "Chrome not found"
+          exit 1
+        }
+
         $extensionDir = (Get-Location).Path
         $pemFile = Join-Path $extensionDir "dtako_chrome_ext.pem"
 
