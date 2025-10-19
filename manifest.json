@@ -1,6 +1,6 @@
 {
   "name": "デジタコデータ取込補助(ctrl+shift+H)",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 3,
   "update_url": "https://yhonda-ohishi-pub-dev.github.io/dtako_chrome_ext/update_manifest.xml",
   "background": {
