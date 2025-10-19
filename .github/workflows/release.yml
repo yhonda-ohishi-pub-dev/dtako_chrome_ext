@@ -24,6 +24,39 @@ jobs:
         Write-Host ".pem file restored successfully"
       shell: powershell
 
+    - name: Install Chrome
+      run: |
+        choco install googlechrome -y
+      shell: powershell
+
+    - name: Build CRX file
+      run: |
+        $chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+        $extensionDir = (Get-Location).Path
+        $pemFile = Join-Path $extensionDir "dtako_chrome_ext.pem"
+
+        # Chromeでcrxファイルをビルド
+        & $chromePath --pack-extension="$extensionDir" --pack-extension-key="$pemFile"
+
+        if (Test-Path "$extensionDir.crx") {
+          Move-Item "$extensionDir.crx" "dtako_chrome_ext.crx" -Force
+          Write-Host "CRX file created successfully"
+        } else {
+          Write-Error "Failed to create CRX file"
+          exit 1
+        }
+      shell: powershell
+
+    - name: Update update_manifest.xml
+      run: |
+        $version = "${{ github.ref_name }}".TrimStart('v')
+        $content = Get-Content update_manifest.xml -Raw
+        $content = $content -replace "version='[^']*'", "version='$version'"
+        $content = $content -replace "download/v[^/]*/", "download/${{ github.ref_name }}/"
+        Set-Content update_manifest.xml $content
+        Write-Host "Updated update_manifest.xml with version $version"
+      shell: powershell
+
     - name: Install Inno Setup
       run: |
         choco install innosetup -y
@@ -36,7 +69,10 @@ jobs:
     - name: Create Release and Upload Asset
       uses: softprops/action-gh-release@v1
       with:
-        files: ./Output/digitaco-chrome-ext-setup-v1.0.exe
+        files: |
+          ./Output/digitaco-chrome-ext-setup-v1.0.exe
+          dtako_chrome_ext.crx
+          update_manifest.xml
         name: Release ${{ github.ref_name }}
         body: |
           ## デジタコデータ取込補助 ${{ github.ref_name }}
