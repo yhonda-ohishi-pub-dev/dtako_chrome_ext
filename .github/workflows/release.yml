@@ -30,21 +30,11 @@ jobs:
         & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
       shell: powershell
 
-    - name: Get version from tag
-      id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-      shell: bash
-
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release and Upload Asset
+      uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref_name }}
-        draft: false
-        prerelease: false
+        files: ./Output/digitaco-chrome-ext-setup-v1.0.exe
+        name: Release ${{ github.ref_name }}
         body: |
           ## デジタコデータ取込補助 ${{ github.ref_name }}
 
@@ -59,13 +49,7 @@ jobs:
 
           ### 変更内容
           - 初回リリース
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Output/digitaco-chrome-ext-setup-v1.0.exe
-        asset_name: digitaco-chrome-ext-setup-${{ github.ref_name }}.exe
-        asset_content_type: application/octet-stream
