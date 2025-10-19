@@ -1,5 +1,5 @@
 #define MyAppName "デジタコデータ取込補助"
-#define MyAppVersion "1.7"
+#define MyAppVersion "1.8"
 #define MyAppPublisher "Your Company Name"
 #define MyAppURL "https://github.com/yhonda-ohishi-pub-dev/dtako_chrome_ext"
 #define ExtensionId "cbopaljicfjeophjpnnbgdhcpnlhobcj"
@@ -12,16 +12,19 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={src}
+DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=Output
 OutputBaseFilename=digitaco-chrome-ext-setup-v{#MyAppVersion}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-PrivilegesRequired=admin
+PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+CreateUninstallRegKey=no
+Uninstallable=no
 
 [Languages]
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
@@ -105,5 +108,5 @@ begin
   end;
 end;
 
-[UninstallDelete]
-Type: filesandordirs; Name: "{app}"
+[Icons]
+; アンインストール用のショートカットを作成しない
