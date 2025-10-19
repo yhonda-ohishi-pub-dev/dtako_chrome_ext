@@ -145,8 +145,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-    - name: Checkout
+    - name: Checkout main branch
       uses: actions/checkout@v4
+      with:
+        ref: main
 
     - name: Create pages directory
       run: |
