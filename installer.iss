@@ -1,5 +1,5 @@
 #define MyAppName "デジタコデータ取込補助"
-#define MyAppVersion "1.1"
+#define MyAppVersion "1.2"
 #define MyAppPublisher "Your Company Name"
 #define MyAppURL "https://github.com/yhonda-ohishi-pub-dev/dtako_chrome_ext"
 #define ExtensionId "cbopaljicfjeophjpnnbgdhcpnlhobcj"
@@ -27,38 +27,37 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 
 [Files]
-; 拡張機能のファイルをすべてコピー
-Source: "manifest.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "background.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "content_script.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "popup.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "DataDisplayConfig.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "GeneralCsv.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "OperationEdit.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "OperationExpenseEdit.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "OperationWorkEdit.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "jquery-3.7.1.min.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "jquery.cookie.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "favicon-16x16.png"; DestDir: "{app}"; Flags: ignoreversion
-Source: "favicon-32x32.png"; DestDir: "{app}"; Flags: ignoreversion
-Source: "html\*"; DestDir: "{app}\html"; Flags: ignoreversion recursesubdirs
+; CRXファイルをインストール
+Source: "dtako_chrome_ext.crx"; DestDir: "{app}"; Flags: ignoreversion
+Source: "update_manifest.xml"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
-; パッケージ化されていない拡張機能として配布するため、レジストリ登録は不要
-; 手動で chrome://extensions/ から読み込む方式を採用
+; Chrome拡張機能を企業ポリシーで自動インストール（update_url経由で自動更新）
+Root: HKLM; Subkey: "Software\Policies\Google\Chrome\ExtensionInstallForcelist"; ValueType: string; ValueName: "1"; ValueData: "{#ExtensionId};https://yhonda-ohishi-pub-dev.github.io/dtako_chrome_ext/update_manifest.xml"; Flags: uninsdeletevalue
 
 [Code]
 function InitializeSetup(): Boolean;
 begin
   Result := True;
-  MsgBox('この拡張機能は、インストール後にChromeを再起動する必要があります。' + #13#10 + #13#10 +
-         'インストール完了後、以下の手順を実行してください：' + #13#10 +
-         '1. Chromeを再起動' + #13#10 +
-         '2. chrome://extensions/ を開く' + #13#10 +
-         '3. デベロッパーモードをON' + #13#10 +
-         '4. 「パッケージ化されていない拡張機能を読み込む」をクリック' + #13#10 +
-         '5. インストールフォルダを選択: ' + ExpandConstant('{autopf}\{#MyAppName}'),
+  MsgBox('この拡張機能をインストールします。' + #13#10 + #13#10 +
+         '注意事項：' + #13#10 +
+         '- 管理者権限が必要です' + #13#10 +
+         '- インストール後、Chromeを再起動してください' + #13#10 +
+         '- 拡張機能が自動的にインストールされます' + #13#10 +
+         '- 今後のバージョンアップは自動で行われます',
          mbInformation, MB_OK);
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    MsgBox('インストールが完了しました。' + #13#10 + #13#10 +
+           'Chromeを再起動すると、拡張機能が自動的に有効になります。' + #13#10 + #13#10 +
+           '拡張機能ID: {#ExtensionId}' + #13#10 +
+           '自動更新: 有効',
+           mbInformation, MB_OK);
+  end;
 end;
 
 [UninstallDelete]
