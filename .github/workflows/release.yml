@@ -24,64 +24,61 @@ jobs:
         Write-Host ".pem file restored successfully"
       shell: powershell
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
     - name: Build CRX file
       run: |
-        # Chromeのパスを探す
-        $chromePaths = @(
-          "C:\Program Files\Google\Chrome\Application\chrome.exe",
-          "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-          "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
-        )
-
-        $chromePath = $null
-        foreach ($path in $chromePaths) {
-          if (Test-Path $path) {
-            $chromePath = $path
-            Write-Host "Found Chrome at: $chromePath"
-            break
-          }
-        }
-
-        if (-not $chromePath) {
-          Write-Error "Chrome not found"
-          exit 1
-        }
-
-        $currentDir = (Get-Location).Path
-        $pemFile = Join-Path $currentDir "dtako_chrome_ext.pem"
-        $tempExtDir = Join-Path $env:TEMP "chrome_ext_build"
+        # crx3パッケージをインストール
+        npm install -g crx3
 
         # 一時ディレクトリを作成してクリーンなファイルをコピー
+        $currentDir = (Get-Location).Path
+        $tempExtDir = Join-Path $env:TEMP "chrome_ext_build"
+
         if (Test-Path $tempExtDir) {
           Remove-Item $tempExtDir -Recurse -Force
         }
         New-Item -ItemType Directory -Path $tempExtDir | Out-Null
 
-        # 必要なファイルのみをコピー（.pemや.github、Outputなどを除外）
-        $excludeDirs = @('.github', '.git', 'Output', 'node_modules')
-        $excludeFiles = @('*.pem', '*.crx', '.gitignore', 'build-installer.bat', 'installer.iss', 'update_manifest.xml', 'README.md')
+        # 必要なファイルのみをコピー
+        $filesToCopy = @(
+          "manifest.json",
+          "background.js",
+          "content_script.js",
+          "popup.js",
+          "DataDisplayConfig.js",
+          "GeneralCsv.js",
+          "OperationEdit.js",
+          "OperationExpenseEdit.js",
+          "OperationWorkEdit.js",
+          "jquery-3.7.1.min.js",
+          "jquery.cookie.js",
+          "favicon-16x16.png",
+          "favicon-32x32.png",
+          "html"
+        )
 
-        Get-ChildItem -Path $currentDir -Exclude $excludeDirs | Where-Object {
-          $item = $_
-          $isExcluded = $false
-          foreach ($pattern in $excludeFiles) {
-            if ($item.Name -like $pattern) {
-              $isExcluded = $true
-              break
-            }
+        foreach ($item in $filesToCopy) {
+          $sourcePath = Join-Path $currentDir $item
+          if (Test-Path $sourcePath) {
+            Copy-Item $sourcePath -Destination $tempExtDir -Recurse -Force
+            Write-Host "Copied: $item"
           }
-          -not $isExcluded
-        } | Copy-Item -Destination $tempExtDir -Recurse -Force
+        }
 
-        Write-Host "Extension files copied to: $tempExtDir"
+        # crx3でCRXファイルをビルド
+        $pemFile = Join-Path $currentDir "dtako_chrome_ext.pem"
+        $crxFile = Join-Path $currentDir "dtako_chrome_ext.crx"
 
-        # Chromeでcrxファイルをビルド
-        & $chromePath --pack-extension="$tempExtDir" --pack-extension-key="$pemFile"
+        crx3 "$tempExtDir" -p "$pemFile" -o "$crxFile"
 
-        $crxOutput = "$tempExtDir.crx"
-        if (Test-Path $crxOutput) {
-          Move-Item $crxOutput (Join-Path $currentDir "dtako_chrome_ext.crx") -Force
+        if (Test-Path $crxFile) {
           Write-Host "CRX file created successfully"
+          $fileSize = (Get-Item $crxFile).Length
+          Write-Host "CRX file size: $fileSize bytes"
         } else {
           Write-Error "Failed to create CRX file"
           exit 1
