@@ -98,29 +98,10 @@ jobs:
         Write-Host "Updated update_manifest.xml with version $version"
       shell: powershell
 
-    - name: Create README for ZIP
-      run: |
-        $readme = "# デジタコデータ取込補助 Chrome拡張機能`n`n"
-        $readme += "## インストール方法`n`n"
-        $readme += "1. Chromeを開いて chrome://extensions/ にアクセス`n"
-        $readme += "2. 右上の「デベロッパーモード」をONにする`n"
-        $readme += "3. このフォルダから「dtako_chrome_ext.crx」をChromeの拡張機能ページにドラッグ&ドロップ`n"
-        $readme += "4. 「拡張機能を追加」をクリック`n`n"
-        $readme += "## 使い方`n`n"
-        $readme += "1. Chromeのツールバーに表示される拡張機能アイコンをクリック`n"
-        $readme += "2. ID2（会社コード）、ID1、パスワードを入力して保存`n"
-        $readme += "3. Ctrl+Shift+H でデジタコデータ取込ページを開く`n`n"
-        $readme += "## 注意事項`n`n"
-        $readme += "- 拡張機能ID: cbopaljicfjeophjpnnbgdhcpnlhobcj`n"
-        $readme += "- 更新版をインストールする際も同じ手順でドラッグ&ドロップしてください`n"
-        $readme += "- 拡張機能IDが同じため、自動的に更新されます`n"
-        Set-Content -Path "README.txt" -Value $readme -Encoding UTF8
-      shell: powershell
-
     - name: Create ZIP package
       run: |
         $zipFile = "dtako_chrome_ext_${{ github.ref_name }}.zip"
-        Compress-Archive -Path dtako_chrome_ext.crx,README.txt -DestinationPath $zipFile
+        Compress-Archive -Path dtako_chrome_ext.crx -DestinationPath $zipFile
         Write-Host "Created ZIP package: $zipFile"
       shell: powershell
 
