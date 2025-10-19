@@ -1,5 +1,5 @@
 #define MyAppName "デジタコデータ取込補助"
-#define MyAppVersion "1.2"
+#define MyAppVersion "1.3"
 #define MyAppPublisher "Your Company Name"
 #define MyAppURL "https://github.com/yhonda-ohishi-pub-dev/dtako_chrome_ext"
 #define ExtensionId "cbopaljicfjeophjpnnbgdhcpnlhobcj"
