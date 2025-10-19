@@ -1,8 +1,11 @@
 name: Deploy to GitHub Pages
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - 'update_manifest.xml'
 
 permissions:
   contents: read
@@ -20,11 +23,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Download update_manifest.xml from release
+    - name: Create pages directory
       run: |
-        # 最新のリリースからupdate_manifest.xmlをダウンロード
-        LATEST_RELEASE=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | jq -r .tag_name)
-        curl -L -o update_manifest.xml "https://github.com/${{ github.repository }}/releases/download/${LATEST_RELEASE}/update_manifest.xml"
+        mkdir -p pages
+        cp update_manifest.xml pages/
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -32,7 +34,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.'
+        path: 'pages'
 
     - name: Deploy to GitHub Pages
       id: deployment
