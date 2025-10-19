@@ -1,13 +1,20 @@
 
 console.log(new Date())
 
+// グローバル変数を宣言
+let popup_back;
+let OperationBack;
+let DispConfigBack;
+let GeneralBack;
+let OpeWorkEditBack;
+let OperationExpenseEdit;
 
 async function openTabs() {
     console.log('拡張機能のアイコンがクリックされました')
 
-    loginflg = false;
-    untenflg = false;
-    dataflg = false;
+    let loginflg = false;
+    let untenflg = false;
+    let dataflg = false;
     let test = await chrome.tabs.query({}, (tabs) => {
 
         for (let i = 0; i < tabs.length; i++) {
@@ -34,8 +41,12 @@ async function openTabs() {
 
 
 async function sendCarInput(car_input) {
+    console.log("sendCarInput called with:", car_input);
     if (OperationBack) {
-        OperationBack.postMessage({ carinput: true })
+        OperationBack.postMessage({ carinput: car_input });
+        console.log("Sent to OperationBack:", car_input);
+    } else {
+        console.log("OperationBack not connected yet");
     }
 };
 
@@ -56,17 +67,17 @@ chrome.runtime.onConnect.addListener(async (port) => {
                 }
             }
             if (msg.carinput) {
-                console.log("carinput:", msg.carinput)
-                await openTabs()
-
-                await sendCarInput()
-
+                console.log("Background received carinput:", msg.carinput);
+                await openTabs();
+                console.log("Tabs opened, now sending car input...");
+                await sendCarInput(msg.carinput);
             }
         })
     }
     if (port.name === "OperationBack") {
-        OperationBack = port
-        await sendCarInput()
+        OperationBack = port;
+        console.log("OperationBack connected");
+        // 接続時には車番が不明なので、送信しない
     }
     if (port.name === "DispConfigBack") {
         DispConfigBack = port

@@ -2,8 +2,97 @@
 <html>
 
 <style>
-    #carInput{
-        flex: auto;
+    body {
+        width: 300px;
+        padding: 10px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #carInput {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .settings-section {
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .settings-section h3 {
+        margin: 0 0 10px 0;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 4px;
+        color: #555;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 6px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    #saveSettings {
+        width: 100%;
+        padding: 8px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    #saveSettings:hover {
+        background-color: #45a049;
+    }
+
+    .status-message {
+        font-size: 12px;
+        margin-top: 8px;
+        padding: 6px;
+        border-radius: 4px;
+        display: none;
+    }
+
+    .status-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        display: block;
+    }
+
+    #updateSettings {
+        width: 100%;
+        padding: 8px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    #updateSettings:hover {
+        background-color: #0056b3;
+    }
+
+    .settings-section.hidden {
+        display: none;
     }
 </style>
 
@@ -11,7 +100,30 @@
     <meta charset="UTF-8" />
 </head>
 <body>
-    <input type="text" id="carInput" label="車番" autofocus>
+    <div>
+        <input type="text" id="carInput" placeholder="車番を入力" autofocus>
+    </div>
+
+    <div class="settings-section" id="settingsSection">
+        <h3>ログイン設定</h3>
+        <div class="form-group">
+            <label for="txtID2Input">ID2 (会社コード)</label>
+            <input type="text" id="txtID2Input" placeholder="例: 27324455">
+        </div>
+        <div class="form-group">
+            <label for="txtID1Input">ID1 (ユーザー名)</label>
+            <input type="text" id="txtID1Input" placeholder="例: honda">
+        </div>
+        <div class="form-group">
+            <label for="txtPassInput">パスワード</label>
+            <input type="password" id="txtPassInput" placeholder="パスワード">
+        </div>
+        <button id="saveSettings">設定を保存</button>
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <button id="updateSettings" style="display: none;">設定を更新</button>
+
     <script src="../jquery-3.7.1.min.js"></script>
     <script src="../popup.js"></script>
 </body>

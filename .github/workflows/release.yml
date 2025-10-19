@@ -1,0 +1,71 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # v1.0, v1.1 などのタグでトリガー
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Restore .pem file from secrets
+      run: |
+        $pemBase64 = "${{ secrets.CHROME_EXT_PEM }}"
+        $pemBytes = [System.Convert]::FromBase64String($pemBase64)
+        [System.IO.File]::WriteAllBytes("dtako_chrome_ext.pem", $pemBytes)
+        Write-Host ".pem file restored successfully"
+      shell: powershell
+
+    - name: Install Inno Setup
+      run: |
+        choco install innosetup -y
+
+    - name: Build installer
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+      shell: powershell
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        body: |
+          ## デジタコデータ取込補助 ${{ github.ref_name }}
+
+          ### インストール方法
+          1. 下記の `.exe` ファイルをダウンロード
+          2. ダウンロードした `.exe` ファイルを実行
+          3. インストーラーの指示に従う
+          4. Chromeを開いて `chrome://extensions/` にアクセス
+          5. 「デベロッパーモード」をONにする
+          6. 「パッケージ化されていない拡張機能を読み込む」をクリック
+          7. インストールフォルダ（通常 `C:\Program Files\デジタコデータ取込補助`）を選択
+
+          ### 変更内容
+          - 初回リリース
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Output/digitaco-chrome-ext-setup-v1.0.exe
+        asset_name: digitaco-chrome-ext-setup-${{ github.ref_name }}.exe
+        asset_content_type: application/octet-stream

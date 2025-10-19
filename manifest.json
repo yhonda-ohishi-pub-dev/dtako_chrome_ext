@@ -12,7 +12,7 @@
     "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+Shift+H",
-        "mac": "MacCtrl+Shift+H"
+        "mac": "Command+Shift+H"
       },
       "description": "Run extension."
     }

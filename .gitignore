@@ -1,0 +1,17 @@
+# Build outputs
+*.crx
+Output/
+dist/
+
+# Inno Setup output
+Output/
+
+# Private key (keep this secret!)
+*.pem
+
+# Node modules (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
