@@ -26,7 +26,7 @@ jobs:
 
     - name: Build CRX file
       run: |
-        # Chromeのパスを探す（GitHub Actionsランナーに既にインストールされている）
+        # Chromeのパスを探す
         $chromePaths = @(
           "C:\Program Files\Google\Chrome\Application\chrome.exe",
           "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -47,19 +47,48 @@ jobs:
           exit 1
         }
 
-        $extensionDir = (Get-Location).Path
-        $pemFile = Join-Path $extensionDir "dtako_chrome_ext.pem"
+        $currentDir = (Get-Location).Path
+        $pemFile = Join-Path $currentDir "dtako_chrome_ext.pem"
+        $tempExtDir = Join-Path $env:TEMP "chrome_ext_build"
+
+        # 一時ディレクトリを作成してクリーンなファイルをコピー
+        if (Test-Path $tempExtDir) {
+          Remove-Item $tempExtDir -Recurse -Force
+        }
+        New-Item -ItemType Directory -Path $tempExtDir | Out-Null
+
+        # 必要なファイルのみをコピー（.pemや.github、Outputなどを除外）
+        $excludeDirs = @('.github', '.git', 'Output', 'node_modules')
+        $excludeFiles = @('*.pem', '*.crx', '.gitignore', 'build-installer.bat', 'installer.iss', 'update_manifest.xml', 'README.md')
+
+        Get-ChildItem -Path $currentDir -Exclude $excludeDirs | Where-Object {
+          $item = $_
+          $isExcluded = $false
+          foreach ($pattern in $excludeFiles) {
+            if ($item.Name -like $pattern) {
+              $isExcluded = $true
+              break
+            }
+          }
+          -not $isExcluded
+        } | Copy-Item -Destination $tempExtDir -Recurse -Force
+
+        Write-Host "Extension files copied to: $tempExtDir"
 
         # Chromeでcrxファイルをビルド
-        & $chromePath --pack-extension="$extensionDir" --pack-extension-key="$pemFile"
+        & $chromePath --pack-extension="$tempExtDir" --pack-extension-key="$pemFile"
 
-        if (Test-Path "$extensionDir.crx") {
-          Move-Item "$extensionDir.crx" "dtako_chrome_ext.crx" -Force
+        $crxOutput = "$tempExtDir.crx"
+        if (Test-Path $crxOutput) {
+          Move-Item $crxOutput (Join-Path $currentDir "dtako_chrome_ext.crx") -Force
           Write-Host "CRX file created successfully"
         } else {
           Write-Error "Failed to create CRX file"
           exit 1
         }
+
+        # クリーンアップ
+        Remove-Item $tempExtDir -Recurse -Force
       shell: powershell
 
     - name: Update update_manifest.xml
