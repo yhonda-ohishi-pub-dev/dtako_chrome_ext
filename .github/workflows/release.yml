@@ -98,13 +98,38 @@ jobs:
         Write-Host "Updated update_manifest.xml with version $version"
       shell: powershell
 
-    - name: Install Inno Setup
+    - name: Create README for ZIP
       run: |
-        choco install innosetup -y
+        $readme = @"
+# デジタコデータ取込補助 Chrome拡張機能
 
-    - name: Build installer
+## インストール方法
+
+1. Chromeを開いて chrome://extensions/ にアクセス
+2. 右上の「デベロッパーモード」をONにする
+3. このフォルダから「dtako_chrome_ext.crx」をChromeの拡張機能ページにドラッグ&ドロップ
+4. 「拡張機能を追加」をクリック
+
+## 使い方
+
+1. Chromeのツールバーに表示される拡張機能アイコンをクリック
+2. ID2（会社コード）、ID1、パスワードを入力して保存
+3. Ctrl+Shift+H でデジタコデータ取込ページを開く
+
+## 注意事項
+
+- 拡張機能ID: cbopaljicfjeophjpnnbgdhcpnlhobcj
+- 更新版をインストールする際も同じ手順でドラッグ&ドロップしてください
+- 拡張機能IDが同じため、自動的に更新されます
+"@
+        Set-Content -Path "README.txt" -Value $readme -Encoding UTF8
+      shell: powershell
+
+    - name: Create ZIP package
       run: |
-        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        $zipFile = "dtako_chrome_ext_${{ github.ref_name }}.zip"
+        Compress-Archive -Path dtako_chrome_ext.crx,README.txt -DestinationPath $zipFile
+        Write-Host "Created ZIP package: $zipFile"
       shell: powershell
 
     - name: Create Release and Upload Asset
@@ -112,7 +137,7 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ./Output/digitaco-chrome-ext-setup-v*.exe
+          dtako_chrome_ext_${{ github.ref_name }}.zip
           dtako_chrome_ext.crx
           update_manifest.xml
         name: Release ${{ github.ref_name }}
@@ -120,16 +145,21 @@ jobs:
           ## デジタコデータ取込補助 ${{ github.ref_name }}
 
           ### インストール方法
-          1. 下記の `.exe` ファイルをダウンロード
-          2. ダウンロードした `.exe` ファイルを実行
-          3. インストーラーの指示に従う
-          4. Chromeを開いて `chrome://extensions/` にアクセス
-          5. 「デベロッパーモード」をONにする
-          6. 「パッケージ化されていない拡張機能を読み込む」をクリック
-          7. インストールフォルダ（通常 `C:\Program Files\デジタコデータ取込補助`）を選択
+          1. 下記の `dtako_chrome_ext_${{ github.ref_name }}.zip` をダウンロード
+          2. ZIPファイルを展開
+          3. Chromeを開いて `chrome://extensions/` にアクセス
+          4. 「デベロッパーモード」をONにする
+          5. `dtako_chrome_ext.crx` をChromeの拡張機能ページにドラッグ&ドロップ
+          6. 「拡張機能を追加」をクリック
 
-          ### 変更内容
-          - 初回リリース
+          ### 使い方
+          - Chromeツールバーの拡張機能アイコンをクリック
+          - ID2（会社コード）、ID1、パスワードを入力して保存
+          - Ctrl+Shift+H でデジタコデータ取込ページを開く
+
+          ### 注意事項
+          - 拡張機能ID: cbopaljicfjeophjpnnbgdhcpnlhobcj
+          - 更新版も同じ手順でインストール可能（自動的に更新されます）
         draft: false
         prerelease: false
       env:
